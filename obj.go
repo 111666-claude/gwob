@@ -369,6 +369,11 @@ type Obj struct {
 	StrideOffsetPosition int // 0
 	StrideOffsetTexture  int // 3 x 4-byte floats
 	StrideOffsetNormal   int // 5 x 4-byte floats
+
+	// faceSizes records the number of vertices of every parsed face (3 for a
+	// triangle, 4 for a quad), in source order. It lets ray picking report
+	// the original OBJ face ordinal after quad triangulation.
+	faceSizes []int
 }
 
 // objParser holds auxiliary internal parser state.
@@ -915,6 +920,7 @@ func parseLine(p *objParser, o *Obj, line string, options *ObjParserOptions) (bo
 		if size < 3 || size > 4 {
 			return ErrNonFatal, fmt.Errorf("parseLine: line=%d bad face=[%s] size=%d", p.lineCount, face, size)
 		}
+		o.faceSizes = append(o.faceSizes, size)
 		// triangle face: v0 v1 v2
 		// quad face:
 		// v0 v1 v2 v3 =>
